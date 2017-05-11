@@ -141,6 +141,34 @@ class SalesEngineTest < Minitest::Test
 
 
   end
+
+  def test_item_repository_all_returns_all_items
+    se = SalesEngine.from_csv({
+      :items     => "./data/items.csv",
+      :merchants => "./data/merchants.csv"
+      })
+
+    ir   = se.items
+    assert_equal ir.all.count, 1367
+    x = ir.find_by_name("Glitter scrabble frames")
+    assert_equal x.name, "Glitter scrabble frames"
+    assert_equal x.id, "263395617"
+
+    y = ir.find_all_by_description("Any colour glitter")
+    assert_equal y.size, 4
+    z = ir.find_all_by_price("1300")
+    assert_equal y.size, 4
+
+    a = ir.find_all_by_price_in_range(("1000".."1300"))
+    assert_equal a.size, 126
+
+    b = ir.find_all_by_merchant_id("12334185")
+    binding.pry
+    assert_equal b.size, 6
+  end
+
+
+
   def sales_engine_instance
     SalesEngine.from_csv({
       :items     => "./data/items.csv",
