@@ -6,6 +6,7 @@ require 'pry'
 class SalesEngineTest < Minitest::Test
 
   def test_class_exists
+
     s = sales_engine_instance
 
     assert_equal SalesEngine, s.class
@@ -100,6 +101,46 @@ class SalesEngineTest < Minitest::Test
     assert_equal a_merchant, []
   end
 
+  def test_getting_items_from_csv
+    ir = sales_engine_instance.items
+    assert_equal ir.items.count, 1367
+  end
+
+  def test_item_object_can_access_correct_attributes
+    i = Item.new({
+      "id"         => 800,
+      "name"        => "Pencil",
+      "description" => "You can use it to write things",
+      "unit_price"  => 0,
+      "created_at"  => 11,
+      "updated_at"  => 12,
+      "merchant_id" => 1001
+      })
+
+      assert_equal i.id, 800
+      assert_equal i.name, "Pencil"
+      assert_equal i.description, "You can use it to write things"
+      assert_equal i.unit_price, 0
+      assert_equal i.created_at, 11
+      assert_equal i.updated_at, 12
+      assert_equal i.merchant_id, 1001
+  end
+
+  def test_uni_price_to_dollars_returns_float
+    i = Item.new({
+      "id"         => 800,
+      "name"        => "Pencil",
+      "description" => "You can use it to write things",
+      "unit_price"  => 10,
+      "created_at"  => 11,
+      "updated_at"  => 12,
+      "merchant_id" => 1001
+      })
+
+    assert_equal i.unit_price_to_dollars.class, Float
+
+
+  end
   def sales_engine_instance
     SalesEngine.from_csv({
       :items     => "./data/items.csv",
