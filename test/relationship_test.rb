@@ -56,7 +56,8 @@ class RelationshipTest < Minitest::Test
 
   def test_method_total_returns_the_total_dollar_amount_of_the_invoice
     invoice = se.invoices.find_by_id("2")
-    binding.pry
+    assert_equal invoice.total, "$93880.0"
+
     #invoice.total
 
     #invoice.total returns the total $ amount of the invoice
