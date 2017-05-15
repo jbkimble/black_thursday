@@ -211,4 +211,67 @@ class SalesAnalyst
       correct_status = statuses.select{|status| status == current_status}.count
         return percentage = ((correct_status.to_f / statuses.count) * 100).round(2)
     end
+
+    def total_revenue_by_date(date)#given as ####-##-##
+      invoices = []
+        @se_instance.invoices.all.each do |invoice|
+          invoices << invoice if invoice.created_at == date
+        end
+
+      if invoices.empty?
+        return "There were no sales on #{date}"
+      else
+        invoice_ids = invoices.map{|invoice| invoice.id}
+        invoice_items = []
+          @se_instance.invoice_items.all.each do |invoice_item|
+            invoice_items << invoice_item if invoice_ids.include?(invoice_item.invoice_id)
+          end
+          amount = invoice_items.map{|invoice_item| invoice_item.unit_price_to_dollars}
+            return "The total revenue for #{date} is $#{amount.reduce(:+)}"
+          end
+      end
+
+      def top_revenue_earners(x = 20)
+        successful_transactions = []
+          @se_instance.transactions.all.each do|transaction|
+            successful_transactions << transaction if transaction.result == "success"
+          end
+        successful_invoice_ids = successful_transactions.map{|t| t.invoice_id}
+        successful_invoices = []
+          @se_instance.invoices.all.each do |invoice|
+            successful_invoices << invoice if successful_invoice_ids.include?(invoice.id)
+          end
+        successful_invoice_ids= successful_invoices.map{|i| i.id}
+        invoice_items = []
+          @se_instance.invoice_items.all.each do |invoice_item|
+            invoice_items << invoice_item if successful_invoice_ids.include?(invoice_item.invoice_id)
+          end
+        merchant_revenue = Hash.new
+          @se_instance.merchants.all.each do |merchant|
+            merchant_revenue[merchant.id] = 0
+          end
+      
+        relevant_invoice_items_info = invoice_items.map{|ii| [ii.item_id, ii.unit_price]}
+        invoice_item_ids = invoice_items.map{|ii| ii.item_id}
+        items = []
+          @se_instance.items.all.each do |item|
+            items << item if invoice_item_ids.include?(item.id)
+          end
+        relevant_invoice_items_info.each do |arr|
+          items.each do |item|
+            if arr[0] == item.id
+              merchant_revenue[item.merchant_id] += arr[1].to_i
+            end
+          end
+        end
+
+        top_merchant_ids = merchant_revenue.sort_by{|k, v| v}.reverse
+        tmi = top_merchant_ids[0...x].map{|arr| arr[0]}
+        top_merchants = []
+          @se_instance.merchants.all.each do |merchant|
+            top_merchants << merchant.name if tmi.include?(merchant.id)
+          end
+            return top_merchants
+
+      end
 end
