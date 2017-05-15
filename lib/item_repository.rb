@@ -64,6 +64,16 @@ class ItemRepository
      items.each do |item|
        final << item if item.merchant_id == merchant_id
      end
-     final 
+     final
+   end
+
+   def sort_by_id
+     @sorted_items = items.sort_by{|item| item.merchant_id}
+   end
+
+   def chunk_items
+     item_count = []
+     chunked_items = @sorted_items.chunk{|item| item.merchant_id}.each{|arr| item_count << arr.count}
+     return item_count
    end
  end

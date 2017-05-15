@@ -22,6 +22,7 @@ class SalesEngineTest < Minitest::Test
     se = sales_engine_instance
 
     mr = se.merchants
+
     assert_equal mr.class, MerchantRepository
   end
 
@@ -163,10 +164,11 @@ class SalesEngineTest < Minitest::Test
     assert_equal a.size, 126
 
     b = ir.find_all_by_merchant_id("12334185")
-    binding.pry
-    assert_equal b.size, 6
-  end
 
+    assert_equal b.size, 6
+
+
+  end
 
 
   def sales_engine_instance

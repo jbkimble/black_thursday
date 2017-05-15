@@ -5,17 +5,26 @@ require './lib/merchant.rb'
 class MerchantRepository
   attr_reader :merchants
 
-  def initialize(file_name)
-    @merchants = create_merchants(file_name)
+  def initialize(file_name, se_instance)
+    @merchants = create_merchants(file_name, se_instance)
   end
 
-  def create_merchants(file_name)
+  def create_merchants(file_name, se_instance)
     merchants = []
 
     CSV.foreach(file_name, :headers => true) do |row|
-      merchants << Merchant.new(row)
+      merchants << Merchant.new(row, se_instance)
     end
     merchants
+  end
+
+  def merchant_ids
+    merchant_ids = []
+    merchants.each do |merchant|
+      merchant_ids << merchant.id
+    end
+    merchant_ids
+
   end
 
   def all

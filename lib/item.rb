@@ -10,9 +10,14 @@ class Item
     @created_at = row["created_at"]
     @updated_at = row["updated_at"]
     @merchant_id = row["merchant_id"]
+
   end
 
   def unit_price_to_dollars
     unit_price.to_f
+  end
+
+  def merchant
+    @name
   end
 end
