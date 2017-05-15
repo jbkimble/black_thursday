@@ -49,6 +49,17 @@ class Invoice
   end
 
   def total
+  
+    invoice_items = []
+      @se_instance.invoice_items.all.each do |invoice_item|
+        invoice_items << invoice_item if invoice_item.invoice_id == id
+      end
+    prices = []
+      invoice_items.each do |invoice_item|
+        prices << invoice_item.unit_price
+      end
+    prices = prices.map{|str| str.to_i}
+      return "$#{prices.reduce(:+).to_f.round(2)}"
 
   end
 end
