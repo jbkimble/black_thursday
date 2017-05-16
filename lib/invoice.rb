@@ -49,7 +49,7 @@ class Invoice
   end
 
   def total
-  
+
     invoice_items = []
       @se_instance.invoice_items.all.each do |invoice_item|
         invoice_items << invoice_item if invoice_item.invoice_id == id
