@@ -1,12 +1,16 @@
 require 'pry'
 require 'csv'
-require './lib/transaction.rb'
+require_relative './transaction.rb'
 
 class TransactionRepository
   attr_reader :transactions
 
   def initialize(file_name, se_instance)
     @transactions = create_transctions(file_name, se_instance)
+  end
+
+  def inspect
+    "#<#{self.class} #{@merchants.size} rows>"
   end
 
   def create_transctions(file_name, se_instance)

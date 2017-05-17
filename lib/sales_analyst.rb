@@ -1,4 +1,4 @@
-require './lib/sales_engine.rb'
+require_relative './sales_engine.rb'
 require 'date'
 
 class SalesAnalyst
@@ -29,7 +29,7 @@ class SalesAnalyst
     @items_count.each do |num|
       new_nums << (num - self.average_items_per_merchant)**2
     end
-      sd = new_nums.reduce(:+) / (@se_instance.items.all.count - 1)
+      sd = new_nums.reduce(:+) / (new_nums.count)
         return sd = Math.sqrt(sd).round(2)
   end
 
@@ -47,7 +47,7 @@ class SalesAnalyst
     merchants = []
       merchant_ids.each do |id|
         merchant_object = @se_instance.merchants.find_by_id(id)
-        merchants << merchant_object.name
+        merchants << merchant_object
       end
         return merchants
   end
@@ -56,7 +56,7 @@ class SalesAnalyst
     items = @se_instance.merchants.find_by_id(id).items
     prices = []
       items.each do |item|
-        prices << item.unit_price_to_dollars
+        prices << item.unit_price
       end
     avg_price = prices.reduce(:+) / prices.count
       return avg_price.round(2)
@@ -72,25 +72,22 @@ class SalesAnalyst
   end
 
   def golden_items
-    ids = @se_instance.merchants.merchant_ids
     prices = []
-      ids.each do |id|
-        prices << average_item_price_for_merchant(id)
+      @se_instance.items.all.each do |item|
+        prices << item.unit_price
       end
     avg = self.average_average_price_per_merchant
     new_prices = []
       prices.each do |price|
         new_prices << (price - avg) ** 2
       end
-    sd = new_prices.reduce(:+) / (new_prices.count - 1)
-    sd = Math.sqrt(sd).round(2)
+    s = new_prices.reduce(:+) / (new_prices.count)
+    sd = Math.sqrt(s).round(2)
     two_sd_above = avg + (2 * sd)
     items = @se_instance.items.all
     g = []
       items.each do |item|
-        if item.unit_price_to_dollars > two_sd_above
-          g << item
-        end
+        g << item if item.unit_price_to_dollars > two_sd_above
       end
         return g
     end
@@ -102,7 +99,7 @@ class SalesAnalyst
           id = merchant.id
           invoices << @se_instance.invoices.find_all_by_merchant_id(id).count
         end
-          return avg = (invoices.reduce(:+).to_f / invoices.count - 2).round(1)
+          return avg = (invoices.reduce(:+).to_f / invoices.count).round(2)
     end
 
     def average_invoices_per_merchant_standard_deviation
@@ -117,8 +114,8 @@ class SalesAnalyst
         invoices.each do |num|
           new_nums << (num - avg) ** 2
         end
-      sd = new_nums.reduce(:+).to_f / (@se_instance.invoices.all.count - 1)
-      sd = Math.sqrt(sd).round(1)
+      sd = new_nums.reduce(:+).to_f / (new_nums.count)
+      sd = Math.sqrt(sd).round(2)
     end
 
     def top_merchants_by_invoice_count
@@ -136,7 +133,7 @@ class SalesAnalyst
 
       final = []
         merchants.each_with_index do |merchant, idx|
-          final << merchant.name if top_merchants.include?(idx)
+          final << merchant if top_merchants.include?(idx)
         end
           return final
     end
@@ -156,7 +153,7 @@ class SalesAnalyst
 
       final = []
         merchants.each_with_index do |merchant, idx|
-          final << merchant.name if bottom_merchants.include?(idx)
+          final << merchant if bottom_merchants.include?(idx)
         end
           return final
     end
@@ -174,8 +171,10 @@ class SalesAnalyst
         }
       invoices = @se_instance.invoices.all
         invoices.each do |invoice|
-          days_of_the_week[weekday(invoice.created_at)] += 1
+          days_of_the_week[weekday(invoice.created_at.to_s[0..9])] += 1
         end
+
+
         avg_invoices_per_day = []
           days_of_the_week.each do |key, value|
             avg_invoices_per_day << value
@@ -194,7 +193,8 @@ class SalesAnalyst
           days_of_the_week.each do |key, value|
             final << key if value > sd_above
           end
-            return final.join
+
+            return final
     end
 
     def weekday(date_string)
@@ -202,13 +202,12 @@ class SalesAnalyst
     end
 
     def invoice_status(status)
-      current_status = status.to_s
       invoices = @se_instance.invoices.all
       statuses = []
         invoices.each do |invoice|
           statuses << invoice.status
         end
-      correct_status = statuses.select{|status| status == current_status}.count
+      correct_status = statuses.select{|s| s == status}.count
         return percentage = ((correct_status.to_f / statuses.count) * 100).round(2)
     end
 
@@ -266,16 +265,17 @@ class SalesAnalyst
         end
           return merchant_revenue
     end
-      def top_revenue_earners(x = 20)
-        merchant_revenue = self.merchant_revenue
-        top_merchant_ids = merchant_revenue.sort_by{|k, v| v}.reverse
-        tmi = top_merchant_ids[0...x].map{|arr| arr[0]}
-        top_merchants = []
-          @se_instance.merchants.all.each do |merchant|
-            top_merchants << merchant.name if tmi.include?(merchant.id)
-          end
-            return top_merchants
-       end
+
+    def top_revenue_earners(x = 20)
+      merchant_revenue = self.merchant_revenue
+      top_merchant_ids = merchant_revenue.sort_by{|k, v| v}.reverse
+      tmi = top_merchant_ids[0...x].map{|arr| arr[0]}
+      top_merchants = []
+        @se_instance.merchants.all.each do |merchant|
+          top_merchants << merchant.name if tmi.include?(merchant.id)
+        end
+          return top_merchants
+     end
 
      def merchants_with_pending_invoices #not sure if this is correct...
        failed_transactions = []

@@ -1,12 +1,16 @@
 require 'pry'
 require 'csv'
-require './lib/merchant.rb'
+require_relative './merchant.rb'
 
 class MerchantRepository
   attr_reader :merchants
 
   def initialize(file_name, se_instance)
     @merchants = create_merchants(file_name, se_instance)
+  end
+
+  def inspect
+    "#<#{self.class} #{@merchants.size} rows>"
   end
 
   def create_merchants(file_name, se_instance)

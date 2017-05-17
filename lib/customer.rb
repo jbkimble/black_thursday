@@ -3,11 +3,11 @@ class Customer
               :updated_at, :se_instance
 
   def initialize(row, se_instance)
-    @id = row["id"]
+    @id = row["id"].to_i
     @first_name = row["first_name"]
     @last_name = row["last_name"]
-    @created_at = row["created_at"]
-    @updated_at = row["updated_at"]
+    @created_at = Time.parse(row["created_at"])
+    @updated_at = Time.parse(row["updated_at"])
     @se_instance = se_instance
   end
 

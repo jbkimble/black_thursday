@@ -1,12 +1,16 @@
 require 'pry'
 require 'csv'
-require './lib/invoice_item.rb'
+require_relative './invoice_item.rb'
 
 class InvoiceItemRepository
   attr_reader :invoice_items
 
   def initialize(file_name)
     @invoice_items = create_invoice_items(file_name)
+  end
+
+  def inspect
+    "#<#{self.class} #{@merchants.size} rows>"
   end
 
   def create_invoice_items(file_name)
@@ -25,7 +29,7 @@ class InvoiceItemRepository
      customer_ids = []
        customers.each{|customer| customer_ids << customer if customer.customer_id == customer.id}
    end
-   
+
    def find_by_id(id)
      invoice_items.each do |ii|
        return ii if ii.id == id

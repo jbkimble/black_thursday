@@ -1,6 +1,6 @@
 require 'pry'
 require 'csv'
-require './lib/customer.rb'
+require_relative './customer.rb'
 
 class CustomerRepository
   attr_reader :customers
@@ -8,6 +8,10 @@ class CustomerRepository
     def initialize(file_name, se_instance)
       @customers = create_customers(file_name, se_instance)
     end
+
+    def inspect
+    "#<#{self.class} #{@merchants.size} rows>"
+   end
 
     def create_customers(file_name, se_instance)
       customers = []
@@ -28,13 +32,13 @@ class CustomerRepository
 
      def find_all_by_first_name(first_name)
        first_names = []
-         customers.each{|customer| first_names << customer if customer.first_name.include?(first_name)}
+         customers.each{|customer| first_names << customer if customer.first_name.upcase.include?(first_name.upcase)}
            return first_names
      end
 
      def find_all_by_last_name(last_name)
        last_names = []
-         customers.each{|customer| last_names << customer if customer.last_name.include?(last_name)}
+         customers.each{|customer| last_names << customer if customer.last_name.upcase.include?(last_name.upcase)}
            return last_names
      end
 end

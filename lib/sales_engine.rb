@@ -1,11 +1,10 @@
-require './lib/merchant_repository.rb'
-require './lib/item_repository.rb'
-require './lib/invoice_repository.rb'
-require './lib/invoice_item_repository.rb'
-require './lib/transaction_repository.rb'
-require "./lib/customer_repository.rb"
+require_relative './merchant_repository.rb'
+require_relative './item_repository.rb'
+require_relative './invoice_repository.rb'
+require_relative './invoice_item_repository.rb'
+require_relative './transaction_repository.rb'
+require_relative "./customer_repository.rb"
 require 'pry'
-
 class SalesEngine
 
   attr_reader :merchants, :items, :invoices, :invoice_items,
@@ -29,7 +28,7 @@ class SalesEngine
   end
 
   def create_items(file_name)
-    ItemRepository.new(file_name)
+    ItemRepository.new(file_name, self)
   end
 
   def create_invoices(file_name)

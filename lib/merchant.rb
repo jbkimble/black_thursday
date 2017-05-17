@@ -4,7 +4,7 @@ class Merchant
   attr_reader :id, :name, :created_at
 
   def initialize(merchant_attributes, se_instance)
-    @id = merchant_attributes["id"]
+    @id = merchant_attributes["id"].to_i
     @name = merchant_attributes["name"]
     @created_at = merchant_attributes["created_at"]
     @se_instance = se_instance

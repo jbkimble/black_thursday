@@ -1,18 +1,23 @@
 require 'pry'
 require 'csv'
-require './lib/item.rb'
+require_relative './item.rb'
+
 
 class ItemRepository
   attr_reader :items
 
-  def initialize(file_name)
-    @items = create_items(file_name)
+  def initialize(file_name, se_instance)
+    @items = create_items(file_name, se_instance)
   end
 
-  def create_items(file_name)
+  def inspect
+    "#<#{self.class} #{@merchants.size} rows>"
+  end
+
+  def create_items(file_name, se_instance)
     items = []
     CSV.foreach(file_name, :headers => true) do |row|
-      items << Item.new(row)
+      items << Item.new(row, se_instance)
     end
       return items
    end
@@ -35,7 +40,7 @@ class ItemRepository
      nil
    end
 
-   def find_all_by_description(description)
+   def find_all_with_description(description)
      final = []
      items.each do |item|
        final << item if item.description.upcase.include?(description.upcase)
@@ -46,7 +51,7 @@ class ItemRepository
    def find_all_by_price(price)
      final = []
      items.each do |item|
-       final << item if item.unit_price == price
+       final << item if item.unit_price_to_dollars == price.to_f
      end
      final
    end
@@ -54,7 +59,7 @@ class ItemRepository
    def find_all_by_price_in_range(range)
      final = []
      items.each do |item|
-       final << item if range.include?(item.unit_price)
+       final << item if range.include?(item.unit_price_to_dollars)
      end
      final
    end
