@@ -8,7 +8,7 @@ class InvoiceItem
     @id = row["id"].to_i
     @item_id = row["item_id"].to_i
     @invoice_id = row["invoice_id"].to_i
-    @quantity = row["quantity"]
+    @quantity = row["quantity"].to_i
     @unit_price = BigDecimal.new(row["unit_price"].split("").insert(-3, ".").join)
     @created_at = Time.parse(row["created_at"])
     @updated_at = Time.parse(row["updated_at"])

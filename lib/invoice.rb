@@ -31,27 +31,20 @@ class Invoice
     @se_instance.customers.find_by_id(customer_id)
   end
 
-  def paid_in_full?
-    transactions = []
-    @se_instance.transactions.all.each do |transaction|
-      transactions << transaction.result if transaction.id == id
-    end
-      return true if transactions.join == "success"
-        false
+  def is_paid_in_full?
+    transactions = @se_instance.transactions.all.select{|t| t.invoice_id == id}
+    success_or_failure = transactions.map{|t| t.result}
+      if success_or_failure.include?("failed") || transactions.empty?
+        return false
+      end
+        true
   end
 
   def total
-
-    invoice_items = []
-      @se_instance.invoice_items.all.each do |invoice_item|
-        invoice_items << invoice_item if invoice_item.invoice_id == id
-      end
-    prices = []
-      invoice_items.each do |invoice_item|
-        prices << invoice_item.unit_price
-      end
-    prices = prices.map{|str| str.to_i}
-      return "$#{prices.reduce(:+).to_f.round(2)}"
-
+    if self.is_paid_in_full?
+      invoice_items = @se_instance.invoice_items.all.select{|ii| ii.invoice_id == id}
+      prices = invoice_items.map{|ii| [ii.unit_price, ii.quantity]}
+        return total = BigDecimal.new(prices.map{|arr| arr.reduce(:*)}.reduce(:+))
+    end
   end
 end

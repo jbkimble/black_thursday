@@ -212,25 +212,47 @@ class SalesAnalyst
     end
 
     def total_revenue_by_date(date)#given as ####-##-##
-      invoices = []
-        @se_instance.invoices.all.each do |invoice|
-          invoices << invoice if invoice.created_at == date
-        end
+      invoice_ids = @se_instance.invoices.all.select{|i| i.created_at == date}.map{|i| i.id}
+      invoice_items = @se_instance.invoice_items.all.select{|ii| invoice_ids.include?(ii.invoice_id)}
+        return prices = BigDecimal.new(invoice_items.map{|ii| [ii.unit_price, ii.quantity]}.map{|arr| arr.reduce(:*)}.reduce(:+))
 
-      if invoices.empty?
-        return "There were no sales on #{date}"
-      else
-        invoice_ids = invoices.map{|invoice| invoice.id}
-        invoice_items = []
-          @se_instance.invoice_items.all.each do |invoice_item|
-            invoice_items << invoice_item if invoice_ids.include?(invoice_item.invoice_id)
-          end
-          amount = invoice_items.map{|invoice_item| invoice_item.unit_price_to_dollars}
-            return "The total revenue for #{date} is $#{amount.reduce(:+)}"
-      end
     end
 
     def merchant_revenue
+      invoice_items = @se_instance.invoice_items.all.map{|ii| [ii.item_id, ii.quantity, ii.unit_price]}
+      merchant_revenue = {}
+        @se_instance.merchants.all.each do |m|
+          merchant_revenue[m.id] = 0
+        end
+        @se_instance.items.all.each do |i|
+          invoice_items.each do |arr|
+            if i.id == arr[0]
+              merchant_revenue[i.merchant_id] += (arr[1] * arr[2])
+            end
+          end
+        end
+        binding.pry
+=begin
+      successful_transactions_invoice_ids = @se_instance.transactions.all.select{|t| t.result == "success"}.map{|t| t.invoice_id}
+      successful_invoice_ids = @se_instance.invoices.all.select{|i| successful_transactions_invoice_ids.include?(i.id)}.map{|i| i.id}
+      invoice_items = @se_instance.invoice_items.all.select{|ii| successful_invoice_ids.include?(ii.invoice_id)}
+      relevant_invoice_items_info = invoice_items.map{|ii| [ii.item_id, ii.quantity, ii.unit_price]}
+      merchant_revenue = {}
+        @se_instance.merchants.all.each do |m|
+          merchant_revenue[m.id] = 0
+        end
+      items = @se_instance.items.all.select{|i| invoice_items.map{|ii| ii.item_id}.include?(i.id)}
+        relevant_invoice_items_info.each do |arr|
+          items.each do |i|
+            if i.id == arr[0]
+              merchant_revenue[i.merchant_id] += (arr[2])
+            end
+          end
+        end
+          binding.pry
+          return merchant_revenue
+
+=begin
       successful_transactions = []
         @se_instance.transactions.all.each do|transaction|
           successful_transactions << transaction if transaction.result == "success"
@@ -264,6 +286,7 @@ class SalesAnalyst
           end
         end
           return merchant_revenue
+=end
     end
 
     def top_revenue_earners(x = 20)
@@ -272,8 +295,9 @@ class SalesAnalyst
       tmi = top_merchant_ids[0...x].map{|arr| arr[0]}
       top_merchants = []
         @se_instance.merchants.all.each do |merchant|
-          top_merchants << merchant.name if tmi.include?(merchant.id)
+          top_merchants << merchant if tmi.include?(merchant.id)
         end
+        binding.pry
           return top_merchants
      end
 

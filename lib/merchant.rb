@@ -25,13 +25,9 @@ class Merchant
   end
 
   def customers
-    customers = @se_instance.invoices.find_all_by_merchant_id(id)
-    #customer_ids = cumstomers.map{|customer| customer.customer_id}
-    customer_ids = []
-      customers.each do |customer|
-        customer_ids << customer.id
-      end
-    @se_instance.customers.all.select{|c|customer_ids.include?(c.id)}
-  end
 
+    invoices_customer_ids = self.invoices.map{|i| i.customer_id}
+    customers = @se_instance.customers.all.select{|c| invoices_customer_ids.include?(c.id)}
+
+  end 
 end
