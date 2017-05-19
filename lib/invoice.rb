@@ -47,4 +47,8 @@ class Invoice
         return total = BigDecimal.new(prices.map{|arr| arr.reduce(:*)}.reduce(:+))
     end
   end
+
+  def invoice_items
+    @se_instance.invoice_items.all.select{|ii| ii.invoice_id == id}
+  end
 end
